@@ -12,8 +12,16 @@ app.post('/create-user', async (req, res) => {
 });
 app.post('/get-data', async (req, res) => {
     const gameData = await GetData(req.body.userKey);
-    // console.log(gameData);
-    res.json(gameData);
+    if(!gameData) {
+        res.statusCode = 500;
+        res.json({
+            result: 500,
+            userKey: req.body.userKey,
+            message: "유저 데이터를 찾을 수 없습니다.\n개발자에게 문의 바랍니다."
+        })
+    } else {
+        res.json(gameData);
+    }
 });
 app.post('/sync-data', async (req, res) => {
     const gameData = {
