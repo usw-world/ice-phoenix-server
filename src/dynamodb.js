@@ -29,7 +29,7 @@ export const AddUser = async (userKey) => {
     Statement: `INSERT INTO "${tableName}"
                 VALUE {
                   'userKey' : ?,
-                  'level' : ?,
+                  'rate' : ?,
                   'sceneNo' : ?,
                   'clearCount' : ?,
                   'adaptation' : ?
@@ -53,7 +53,7 @@ export const AddUser = async (userKey) => {
 };
 export const GetData = async (userKey) => {
   const params = {
-    Statement: `SELECT "userKey", "level", "sceneNo", "clearCount", "adaptation"
+    Statement: `SELECT "userKey", "rate", "sceneNo", "clearCount", "adaptation"
                 FROM "${tableName}"
                 WHERE "userKey" = ?
     `,
@@ -64,7 +64,7 @@ export const GetData = async (userKey) => {
     if(data.Items.length > 0) {
       let gameData = {
         "userKey" : data.Items[0].userKey.S,
-        "level" : data.Items[0].level.N,
+        "rate" : data.Items[0].rate.N,
         "sceneNo" : data.Items[0].sceneNo.N,
         "clearCount" : data.Items[0].clearCount.N,
         "adaptation" : Array.from(data.Items[0].adaptation.L, elmt => elmt.N),
@@ -81,7 +81,7 @@ export const GetData = async (userKey) => {
 };
 export const UpdateData = async (gameData) => {
   const originData = await GetData(gameData.userKey);
-  if(originData.level > gameData.level
+  if(originData.rate > gameData.rate
   || originData.clearCount > gameData.clearCount) {
     console.error("Server got the invaild data. Update process stoped.");
     return false;
@@ -89,11 +89,11 @@ export const UpdateData = async (gameData) => {
   const params = {
     Statements: [{
       Statement: `UPDATE "${tableName}"
-                  SET "level"=?, "sceneNo"=?, "clearCount"=?, "adaptation"=?
+                  SET "rate"=?, "sceneNo"=?, "clearCount"=?, "adaptation"=?
                   WHERE "userKey"=?
       `,
       Parameters: [
-        { N: ''+gameData.level },
+        { N: ''+gameData.rate },
         { N: ''+gameData.sceneNo },
         { N: ''+gameData.clearCount },
         { L: Array.from(gameData.adaptation, elmt => { return { N: ''+elmt }; }) },
