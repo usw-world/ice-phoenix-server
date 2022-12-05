@@ -93,7 +93,7 @@ export const UpdateData = async (gameData) => {
   const params = {
     Statements: [{
       Statement: `UPDATE "${tableName}"
-                  SET "rate"=?, "rateGauge=?", "sceneNo"=?, "clearCount"=?, "adaptation"=?
+                  SET "rate"=?, "rateGauge"=?, "sceneNo"=?, "clearCount"=?, "adaptation"=?
                   WHERE "userKey"=?
       `,
       Parameters: [
