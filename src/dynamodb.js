@@ -30,6 +30,7 @@ export const AddUser = async (userKey) => {
                 VALUE {
                   'userKey' : ?,
                   'rate' : ?,
+                  'rateGauge' : ?,
                   'sceneNo' : ?,
                   'clearCount' : ?,
                   'adaptation' : ?
@@ -38,6 +39,7 @@ export const AddUser = async (userKey) => {
     Parameters: [
       { S: userKey },
       { N: '1' },
+      { N: '0' },
       { N: '0' },
       { N: '0' },
       { L: [{N: '0'}, {N: '0'}, {N: '0'}, {N: '0'}, {N: '0'}] },
@@ -53,7 +55,7 @@ export const AddUser = async (userKey) => {
 };
 export const GetData = async (userKey) => {
   const params = {
-    Statement: `SELECT "userKey", "rate", "sceneNo", "clearCount", "adaptation"
+    Statement: `SELECT "userKey", "rate", "rateGauge", "sceneNo", "clearCount", "adaptation"
                 FROM "${tableName}"
                 WHERE "userKey" = ?
     `,
@@ -65,6 +67,7 @@ export const GetData = async (userKey) => {
       let gameData = {
         "userKey" : data.Items[0].userKey.S,
         "rate" : data.Items[0].rate.N,
+        "rateGauge" : data.Items[0].rateGauge.N,
         "sceneNo" : data.Items[0].sceneNo.N,
         "clearCount" : data.Items[0].clearCount.N,
         "adaptation" : Array.from(data.Items[0].adaptation.L, elmt => elmt.N),
@@ -82,6 +85,7 @@ export const GetData = async (userKey) => {
 export const UpdateData = async (gameData) => {
   const originData = await GetData(gameData.userKey);
   if(originData.rate > gameData.rate
+  || (originData.rate == gameData.rate && originData.rateGauge > gameData.rateGauge)
   || originData.clearCount > gameData.clearCount) {
     console.error("Server got the invaild data. Update process stoped.");
     return false;
@@ -89,11 +93,12 @@ export const UpdateData = async (gameData) => {
   const params = {
     Statements: [{
       Statement: `UPDATE "${tableName}"
-                  SET "rate"=?, "sceneNo"=?, "clearCount"=?, "adaptation"=?
+                  SET "rate"=?, "rateGauge=?", "sceneNo"=?, "clearCount"=?, "adaptation"=?
                   WHERE "userKey"=?
       `,
       Parameters: [
         { N: ''+gameData.rate },
+        { N: ''+gameData.rateGauge },
         { N: ''+gameData.sceneNo },
         { N: ''+gameData.clearCount },
         { L: Array.from(gameData.adaptation, elmt => { return { N: ''+elmt }; }) },
